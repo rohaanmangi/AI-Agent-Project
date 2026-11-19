@@ -58,13 +58,21 @@ def save_complaint(customer_name, order_id, phone, complaint):
 
 
 def load_messages(session_id):
+    query_one = "SELECT message_json FROM messages WHERE session_id = ? ORDER BY id"
+    query_two = "SELECT message_json FROM messages ORDER BY id"
     with closing(connect()) as connection:
-        rows = connection.execute(
-            "SELECT message_json FROM messages WHERE session_id = ? ORDER BY id",
-            (session_id,),
-        ).fetchall()
-    return messages_from_dict([json.loads(row[0]) for row in rows])
+        if session_id:
+            rows = connection.execute(query_one, (session_id,)).fetchall()
+        else:
+            rows = connection.execute(query_two).fetchall()
+            return messages_from_dict([json.loads(row[0]) for row in rows])
 
+def delete_messages(session_id):
+    with closing(connect()) as connection, connection:
+        cursor = connection.execute(
+                "DELETE FROM messages WHERE session_id = ?", (session_id,)
+            )
+        return cursor.rowcount
 
 def append_messages(session_id, messages):
     # One transaction: save all messages for a successful turn together.

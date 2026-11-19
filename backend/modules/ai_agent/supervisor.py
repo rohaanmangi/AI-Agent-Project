@@ -2,7 +2,7 @@
 from langgraph.prebuilt import create_react_agent
 from langgraph_supervisor import create_supervisor
 from modules.ai_agent.graph import create_chat_model
-from modules.ai_agent.tools import fetch_menu, validate_order_id, log_complaint, get_offer
+from modules.ai_agent.tools import fetch_menu, validate_order_id, log_complaint, get_offer, get_all_history, delete_chat_history
 
 
 def build_supervisor(llm="groq"):
@@ -31,11 +31,18 @@ def build_supervisor(llm="groq"):
         prompt="You answer the offer queries. Make sure to use get_offer."
     )
 
+    history_agent = create_react_agent(
+        model=model,
+        tools=[get_all_history, delete_chat_history],
+        name="history_agent",
+        prompt="You handle chat history requests. Use get_all_history to get all history and delete_chat_history to delete history.",
+    )
+
     supervisor = create_supervisor(
-        agents=[menu_agent, complaint_agent, offer_agent],
+        agents=[menu_agent, complaint_agent, offer_agent, history_agent],
         model=model,
         prompt=("You are the manager of Xander Restaurant support. "
-                "Menu or price questions -> menu_agent. Complaints -> complaint_agent. Offer questions -> get_offer"
+                "Menu or price questions -> menu_agent. Complaints -> complaint_agent. Offer questions -> get_offer. History or delete history -> history_agent."
                 "For greetings, answer yourself in one short line. "
                 "After a worker agent answers, write nothing more: repeat the worker's answer exactly."),
     )

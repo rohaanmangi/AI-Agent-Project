@@ -1,6 +1,7 @@
 """The same restaurant actions as Day 24, now described with @tool."""
 from langchain_core.tools import tool
-from core.database.sqlite import save_complaint
+from core.database.sqlite import save_complaint, delete_messages
+from service import get_history
 # from modules.knowledge.service import search_knowledge
 
 order_list = [
@@ -38,11 +39,25 @@ def get_offer() -> dict                                                         
         "message": "***Today's Offer***\n- Buy 2 Zinger Burgers get 1 Club Sandwich"
     }
 
+@tool
+def get_all_history() -> list[dict]:
+    """Get chat history for all chats"""
+    return get_history()
+
+@tool
+def delete_chat_history(session_id) -> dict:
+    """Delete chat history for a specific session_id or all chats if none is provided."""
+    delete_messages(session_id)
+    return {"message": "Chat history deleted successfully"}
+    
+
 TOOLS = [
     fetch_menu,
     validate_order_id,
     log_complaint,
-    get_offer
+    get_offer,
+    get_all_history,
+    delete_chat_history
 ]
 
 
