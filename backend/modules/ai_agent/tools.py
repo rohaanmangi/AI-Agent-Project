@@ -42,6 +42,7 @@ def get_offer() -> dict                                                         
 @tool
 def get_all_history() -> list[dict]:
     """Get chat history for all chats"""
+    from modules.ai_agent.service import get_history
     return get_history()
 
 @tool
